@@ -406,8 +406,6 @@ acl sandbox-webapp01 src 192.168.100.20
 # dom_linux_mirror
 acl dom_linux_mirror dstdomain mirrors.fedoraproject.org        # EPEL
 acl dom_linux_mirror dstdomain vault.centos.org                 # CentOS 6
-acl dom_linux_mirror dstdomain mirror.kakao.com                 # CentOS 7, Ubuntu, EPEL
-acl dom_linux_mirror dstdomain mirror.navercorp.com             # CentOS 7, Rocky 8~9
 acl dom_linux_mirror dstdomain mirrors.rockylinux.org           # Rocky 8~9
 acl dom_linux_mirror dstdomain mirror.anigil.com                # CentOS 6~7, Rocky 8~9, Ubuntu
 acl dom_linux_mirror dstdomain dl.rockylinux.org                # Rocky Mirror
@@ -418,7 +416,7 @@ acl dom_python dstdomain files.pythonhosted.org
 
 acl dom_slack dstdomain slack.com
 acl dom_slack dstdomain api.slack.com
-acl dom_slack dstdomain hooks.slack.co
+acl dom_slack dstdomain hooks.slack.com
 
 ```
 < access_policy.conf > 
