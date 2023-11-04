@@ -418,10 +418,10 @@ http_access allow Safe_methods sandbox-webapp01 dom_python
 ```
 
 ### 9.4. Configure policies with specified operating hours.
--  set to work only from 00:00-19:00 every day
+- policy set to work only from 00:00-19:00 every day
   
 ```bash
-acl all_weekdays time 00:00-09:00
+acl all_weekdays time 00:00-19:00
 ...
 
 http_access allow Safe_methods all_weekdays service-src service-dst
@@ -429,7 +429,8 @@ http_access allow localhost
 http_access deny service-src
 ```
 
-- Set to work on Saturday and Sunday only
+- policy set to work on Saturday and Sunday only
+  
 ```bash
 acl weekend time S Su 00:00-23:59
 ...
