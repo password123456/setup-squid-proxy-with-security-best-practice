@@ -1,7 +1,7 @@
-# setup squid proxy with security best practice
+# Setup Squid Proxy With Security Best Practice
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fpassword123456%2Fsetup-squid-proxy-with-security-best-practice&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 
-- Security best practices when a squid proxy is being used as a forward proxy
+- Security best practices when a squid proxy is being used as a "forward proxy"
 - If you are configuring as a reverse proxy, some topics in this guide may not be applicable. We recommend cross-referencing other security guides for appropriate security hardening criteria when using Reverse Proxy.
 
 ```
@@ -21,18 +21,9 @@ The Squid proxy runs using the default account, which is usually named 'squid'. 
 [ Verification Method ]
 - Check the Squid process account.
 ```bash
-[root@localhost ~]# systemctl status squid
-● squid.service - Squid caching proxy
-   Loaded: loaded (/usr/lib/systemd/system/squid.service; enabled; vendor preset: disabled)
-   Active: active (running) since Thu 2023-10-19 14:19:48 KST; 6 days ago
-     Docs: man:squid(8)
-  Process: 682430 ExecReload=/usr/bin/kill -HUP $MAINPID (code=exited, status=0/SUCCESS)
- Main PID: 579590 (squid)
-    Tasks: 2 (limit: 11140)
-   Memory: 58.3M
-   CGroup: /system.slice/squid.service
-           ├─579590 /usr/sbin/squid --foreground -f /etc/squid/squid.conf
-           └─579592 (squid-1) --kid squid-1 --foreground -f /etc/squid/squid.conf
+[root@localhost ~]# ps -ef | grep squid
+root        5346       1  0 Nov03 ?        00:00:00 /usr/sbin/squid --foreground -f /etc/squid/squid.conf
+squid       5349    5346  0 Nov03 ?        00:00:04 (squid-1) --kid squid-1 --foreground -f /etc/squid/squid.conf
 ```
 
 [ Action Plan ] 
