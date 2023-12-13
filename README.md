@@ -306,7 +306,6 @@ http_port 3128
 192.168.100.22
 live-oauth-app1
 live-oauth-app2
-pg-sec-logstore01.wadiz.office
 www.mydomain.net    #Domain
 .google.com         #Depth Domain
 ```
