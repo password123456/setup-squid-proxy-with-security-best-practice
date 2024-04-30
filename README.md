@@ -30,7 +30,7 @@ squid-4.15-6.module+el8.8.0+1273+55f5b063.x86_64
   + [9.4. Configure policies with specified operating hours](#94-configure-policies-with-specified-operating-hours)
 * [10. Ensure detailed logging is enabled](#10-ensure-detailed-logging-is-enabled)
 * [11. Ensure log files are rotated](#11-ensure-log-files-are-rotated)
-* [12.Tips](#12-tips)
+* [12. Tips](#12-tips)
   + [12.1. Completed Squid configuration](#121-completed-squid-configuration)
   + [12.2. Proxying for Linux yum package updates](#122-proxying-for-linux-yum-package-updates)
   + [12.3. Proxying for Windows updates service](#123-proxying-for-windows-updates-service)
