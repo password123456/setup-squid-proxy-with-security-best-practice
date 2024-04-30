@@ -3,7 +3,7 @@
 
 - Security best practices when a squid proxy is being used as a "forward proxy"
 - If you are configuring as a reverse proxy, some topics in this guide may not be applicable. We recommend cross-referencing other security guides for appropriate security hardening criteria when using Reverse Proxy.
-
+- Last Modified: 2024.04.30
 ```
 # cat /etc/redhat-release
 Rocky Linux release 8.8 (Green Obsidian)
@@ -14,7 +14,28 @@ squid-4.15-6.module+el8.8.0+1273+55f5b063.x86_64
 2023.11.04 Confirmed.
 ```
 ***
+## Table of Contents
+* [1. Ensure that SQUID is run using a non-privileged, dedicated service account - groups](#1-ensure-that-squid-is-run-using-a-non-privileged-dedicated-service-account---groups)
+* [2. Ensure access to SQUID directories and files is restricted](#2-ensure-access-to-squid-directories-and-files-is-restricted)
+* [3. Ensure httpd_suppress_version_string directive is set to "on"](#3-ensure-httpd_suppress_version_string-directive-is-set-to-on)
+* [4. Ensure "Via" Header is removed](#4-ensure-via-header-is-removed)
+* [5. Ensure "X-Cache, X-Cache-Lookup" Headers are removed](#5-ensure-x-cache-x-cache-lookup-headers-are-removed)
+* [6. Ensure Inbound X-Forwarded-For Header is restricted](#6-ensure-inbound-x-forwarded-for-header-is-restricted)
+* [7. Ensure Outbound X-Forwarded-For Header is restricted](#7-ensure-outbound-x-forwarded-for-header-is-restricted)
+* [8. Ensure HTTP Method is restricted](#8-ensure-http-method-is-restricted)
+* [9. Ensure Access Control Policy (ACL) is correct](#9-ensure-access-control-policy-acl-is-correct)
+  + [9.1. Allow all external access for specific (source) hosts/ranges (Any destination)](#91-allow-all-external-access-for-specific-source-hostsranges-any-destination)
+  + [9.2. Allow specific (source) hosts/ranges to access specified (destination) URLs (Scenario 1)](#92-allow-specific-source-hostsranges-to-access-specified-destination-urls-scenario-1)
+  + [9.3. Allow specific (source) hosts/ranges to access specified (destination) URLs (Scenario 2)](#93-allow-specific-source-hostsranges-to-access-specified-destination-urls-scenario-2)
+  + [9.4. Configure policies with specified operating hours](#94-configure-policies-with-specified-operating-hours)
+* [10. Ensure detailed logging is enabled](#10-ensure-detailed-logging-is-enabled)
+* [11. Ensure log files are rotated](#11-ensure-log-files-are-rotated)
+* [12.Tips](#121-completed-squid-configuration)
+  + [12.1. Completed Squid configuration](#121-completed-squid-configuration)
+  + [12.2. Proxying for Linux yum package updates](#122-proxying-for-linux-yum-package-updates)
+  + [12.3. Proxying for Windows updates service](#123-proxying-for-windows-updates-service)
 
+***
 ## 1. Ensure that SQUID is run using a non-privileged, dedicated service account - groups
 The Squid proxy runs using the default account, which is usually named 'squid'. If the Squid proxy is not running under the 'squid' account or is being executed with root privileges, you should change it.
 
@@ -82,7 +103,7 @@ drwxrwxr-x.  2 root root    102 Oct 26 07:56 conf.d
 ```
 
 
-## 3. Ensure httpd_suppress_version_string directive is set to 'on'
+## 3. Ensure httpd_suppress_version_string directive is set to "on"
 By default, the Squid proxy displays the installed proxy version information in the Server header and on error pages. To prevent the version information from being displayed, follow these steps.
 
 [ Check Item ]
@@ -272,7 +293,7 @@ Each policy can also be controlled by setting a time limit for operation
 
 Here are some example scenarios of access control policies:)
 
-### 9.1. Allow all external access for specific (source) hosts/ranges (Any destination). 
+### 9.1. Allow all external access for specific (source) hosts/ranges (Any destination)
 < squid.conf >
 ```bash
 ...
@@ -310,7 +331,7 @@ www.mydomain.net    #Domain
 .google.com         #Depth Domain
 ```
 
-### 9.2. Allow specific (source) hosts/ranges to access specified (destination) URLs (Scenario 1).
+### 9.2. Allow specific (source) hosts/ranges to access specified (destination) URLs (Scenario 1)
 < squid.conf >
 ```bash
 ...
@@ -356,7 +377,7 @@ files.pythonhosted.org
 api.slack.com
 ```
 
-### 9.3. Allow specific (source) hosts/ranges to access specified (destination) URLs (Scenario 2).
+### 9.3. Allow specific (source) hosts/ranges to access specified (destination) URLs (Scenario 2)
 < squid.conf >
 ```bash
 ...
@@ -416,7 +437,7 @@ http_access allow Safe_methods sandbox-webapp01 dom_slack
 http_access allow Safe_methods sandbox-webapp01 dom_python
 ```
 
-### 9.4. Configure policies with specified operating hours.
+### 9.4. Configure policies with specified operating hours
 - policy set to work only from 00:00-19:00 every day
   
 ```bash
@@ -550,7 +571,7 @@ drwxr-xr-x. 13 root  root      4096 Oct 29 03:21 ..
 ***
   
 
-## Tips 1:  completed squid.conf 
+## 12.1. Completed Squid configuration
 < squid.conf >
 ```bash
 acl Safe_ports port 80              # http
@@ -629,7 +650,7 @@ reply_header_access X-Cache-Lookup deny all
 reply_header_access Server deny all
 ```
 
-## Tips 2: Very simple proxying for Linux yum package updates
+## 12.2. Proxying for Linux yum package updates
 When performing Linux yum or dnf package updates through a Squid proxy, it is often necessary to specify all the URLs that yum or dnf may access, which can be a cumbersome and error-prone task.<br><br>
 However, you can take advantage of the User-Agent information provided by these package managers to simplify the access control configuration in Squid. <br>
 
@@ -667,6 +688,150 @@ Here's an example of the Squid access log showing this configuration in action:
 2023-11-03 16:02:09 10.100.120.11:43508 TCP_HIT/200:HIER_NONE "GET http://nginx.org/packages/centos/7/x86_64/RPMS/nginx-1.24.0-1.el7.ngx.x86_64.rpm HTTP/1.1" application/x-redhat-package-manager 200 823278 2 "urlgrabber/3.10 yum/3.4.3" "-"
 
 ```
+
+## 12.3. Proxying for Windows updates service
+
+Through Squid Proxy, you can also handle Windows Updates. However, it requires some configuration adjustments. The domains and applications used by Windows Updates are known to have SSL pinning applied. Since Squid cannot decrypt the traffic involved in Windows Updates, it bypasses the segments where SSL pinning is active and treats trusted domains as exceptions. To bypass the pinned segments, the SSLBump option is used with the 'splice' mode (becoming a TCP tunnel without decrypting proxied traffic).
+
+Below is an example configuration applied via Squid for WSUS server synchronization with Windows Update, which is functioning well as of April 2024.
+
+Please note that certain domains in the configuration may vary depending on the location/region where the proxy is set up.
+
+Here's configuration:
+
+< squid.conf >
+```bash
+..
+....
+
+# define wsus objects
+acl wsus-src src "/etc/squid/acl/wsus-src.acl"
+acl wsus-dst dstdomain "/etc/squid/acl/wsus-dst.acl"
+
+
+# define windows update agents
+acl windows-pkg-agent browser -i Microsoft-CryptoAPI Microsoft-Delivery-Optimization Microsoft BITS Windows-Update-Agent Microsoft WSUS Server
+
+# Allow outbound for wsus-server
+http_access allow Safe_methods wsus-src wsus-dst
+http_access allow Safe_methods wsus-src windows-pkg-agent
+
+# Configuration for wsus to windows_update
+acl DiscoverSNIHost at_step SslBump1
+acl NoSSLIntercept_windows_updates ssl::server_name_regex -i "/etc/squid/acl/sslpin_windowsupdates.nobump"
+ssl_bump splice NoSSLIntercept_windows_updates
+ssl_bump peek DiscoverSNIHost
+ssl_bump bump all
+```
+< wsus-dst.acl >
+```bash
+.windowsupdate.com
+# au.download.windowsupdate.com
+# ctldl.windowsupdate.com
+# download.windowsupdate.com
+
+wustat.windows.com
+.windowsupdate.microsoft.com
+
+.edge.microsoft.com
+.cloudapp.azure.com
+.akamaiedge.net
+
+.akamaized.net
+# img-prod-cms-rt-microsoft-com.akamaized.net
+
+.microsoft.net
+# cxcs.microsoft.net
+
+.digicert.com
+# ocsp.digicert.com
+
+.azureedge.net
+# edgeassetservice.azureedge.net
+# fp-as-nocache.azureedge.net
+
+.msedge.net
+# fp.msedge.net
+# a-ring.msedge.net
+
+download.microsoft.com
+ntservicepack.microsoft.com
+support.microsoft.com
+emdl.ws.microsoft.com
+
+.api.cdp.microsoft.com
+# msedge.api.cdp.microsoft.com
+
+settings-win.data.microsoft.com
+.events.data.microsoft.com
+# v10.events.data.microsoft.com
+
+.update.microsoft.com
+# fe2cr.update.microsoft.com
+# slscr.update.microsoft.com
+
+.delivery.mp.microsoft.com
+# msedge.b.tlu.dl.delivery.mp.microsoft.com
+# fe3.delivery.mp.microsoft.com
+# tlu.dl.delivery.mp.microsoft.com
+
+.prod.do.dsp.mp.microsoft.com
+.trafficshaping.dsp.mp.microsoft.com
+# fe3.delivery.mp.microsoft.com
+# geover.prod.do.dsp.mp.microsoft.com
+# cp501.prod.do.dsp.mp.microsoft.com
+# geo.prod.do.dsp.mp.microsoft.com
+# kv501.prod.do.dsp.mp.microsoft.com
+# tsfe.trafficshaping.dsp.mp.microsoft.com
+
+.prod.cms.rt.microsoft.com
+# query.prod.cms.rt.microsoft.com
+
+www.bing.com
+ieonlinews.microsoft.com
+arc.msn.com
+g.live.com
+.weather.microsoft.com
+config.edge.skype.com
+
+.msftconnecttest.com
+# ipv6.msftconnecttest.com
+# www.msftconnecttest.com
+
+oneclient.sfx.ms
+nav-edge.smartscreen.microsoft.com
+checkappexec.microsoft.com
+api.msn.com
+.azr.footprintdns.com
+go.microsoft.com
+```
+
+< sslpin_windowsupdates.nobump >
+```bash
+\.windowsupdate\.com
+update\.microsoft\.com
+update\.microsoft\.com\.akadns\.net
+\.windows\.com
+\.edge\.microsoft\.com
+\.data\.microsoft\.com
+\.mp\.microsoft\.com
+\.edge\.microsoft\.com
+\.rt\.microsoft\.com
+\.cdp\.microsoft\.com
+\.cloudapp\.azure.com
+\.akamaiedge\.net
+\.microsoft\.net
+\.digicert\.com
+\.azureedge\.net
+\.akamaized\.net
+settings-win\.data\.microsoft\.com
+\.events\.data\.microsoft\.com
+\.msedge\.net
+checkappexec\.microsoft\.com
+```
+( Notes ) 
+- The domain list shown in the configuration is not a hardened adjustment for Windows Updates related domains required for WSUS operation.
+- It roughly allows domains necessary for Windows Updates to function correctly and also allows some basic domains required for Windows usage from the WSUS server. Please refer to this context.
 
 # And...
 - If you find this helpful, please the **"star"**:star2: to support further improvements.
