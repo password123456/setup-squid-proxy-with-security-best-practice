@@ -39,7 +39,7 @@ squid-4.15-6.module+el8.8.0+1273+55f5b063.x86_64
 ## 1. Ensure that SQUID is run using a non-privileged, dedicated service account - groups
 The Squid proxy runs using the default account, which is usually named 'squid'. If the Squid proxy is not running under the 'squid' account or is being executed with root privileges, you should change it.
 
-[ Check Item ]
+**Audit:**
 - Check the Squid process account.
 ```bash
 [root@localhost ~]# ps -ef | grep squid
@@ -47,7 +47,7 @@ root        5346       1  0 Nov03 ?        00:00:00 /usr/sbin/squid --foreground
 squid       5349    5346  0 Nov03 ?        00:00:04 (squid-1) --kid squid-1 --foreground -f /etc/squid/squid.conf
 ```
 
-[ Solution ] 
+**Remediation:** 
 - If the process account is not 'squid,' change it to 'squid' and restart the service.
 ```bash
 [root@localhost ~]# vim /usr/lib/systemd/system/squid.service
@@ -78,7 +78,7 @@ squid:x:23:23::/var/spool/squid:/sbin/nologin
 ## 2. Ensure access to SQUID directories and files is restricted
 Directories and configuration files related to Squid should only be accessible by the 'squid' or 'root' user. Verify and adjust permissions if other users have access to these directories and files.
 
-[ Check Item ]
+**Audit:**
 - Check the permissions for directories and files related to the Squid proxy.
 ```bash
 [root@localhost ~]# ls -al /etc/squid/
@@ -95,7 +95,7 @@ drwxrwxr-x.  2 root root    102 Oct 26 07:56 conf.d
 -rw-r-----.  1 root squid  1859 Oct 17 17:08 squid.conf
 ```
 
-[ Solution ] 
+**Remediation:** 
 - Ensure that directories and files are owned by the 'root' user and that other users do not have access.
 ```bash
 [root@localhost ~]# chown root:root -R /etc/squid
@@ -106,7 +106,7 @@ drwxrwxr-x.  2 root root    102 Oct 26 07:56 conf.d
 ## 3. Ensure httpd_suppress_version_string directive is set to "on"
 By default, the Squid proxy displays the installed proxy version information in the Server header and on error pages. To prevent the version information from being displayed, follow these steps.
 
-[ Check Item ]
+**Audit:**
 - Check if the proxy version information is exposed in the Server header.
 ```bash
 [root@localhost ~]# curl -i -k 127.0.0.1:3128
@@ -129,7 +129,7 @@ HTTP/1.1 400 Bad Request
 ...
 ```
 
-[ Solution ] 
+**Remediation:** 
 - Prevent the version information from being displayed by setting "httpd_suppress_version_string" to "on" in the Squid configuration file. This will hide the version information in the Server header and on error pages.
 ```bash
 [root@localhost ~]# vim /etc/squid/squid.conf
@@ -142,7 +142,7 @@ httpd_suppress_version_string on  # <== Add
 ## 4. Ensure "Via" Header is removed
 The "Via" header reveals information about the server that received the proxy request from the client, including the hostname and proxy version information. To remove the "Via" header, follow these steps.
 
-[ Check Item ]
+**Audit:**
 - Check if the "Via" header is present in the proxy response.
 ```bash
 [root@localhost ~]# curl -i -k 127.0.0.1:3128
@@ -152,7 +152,7 @@ Via: 1.1 blah-proxy01 (squid/4.15)
 Connection: close
 ```
 
-[ Solution ] 
+**Remediation:** 
 - To prevent the "Via" header from being displayed, set the via configuration to "off" in the Squid configuration file.
 ```bash
 [root@localhost ~]# vim /etc/squid/squid.conf
@@ -165,7 +165,7 @@ via off    # <== Add
 ## 5. Ensure "X-Cache, X-Cache-Lookup" Headers are removed
 The "X-Cache" and "X-Cache-Lookup" headers provide information about the proxy's caching behavior. The "X-Cache" header can reveal the hostname of the proxy server and the installed proxy version, so it's a good practice to remove it.
 
-[ Check Item ]
+**Audit:**
 - Check if the "X-Cache" header is present in the proxy response.
 ```bash
 [root@localhost ~]# curl -i -k 127.0.0.1:3128
@@ -178,7 +178,7 @@ Via: 1.1 blah-proxy01 (squid/4.15)
 Connection: close
 ```
 
-[ Solution ] 
+**Remediation:** 
 - To prevent the "X-Cache" and "X-Cache-Lookup" headers from being displayed, use the reply_header_access setting to deny access to these headers.
 ```bash
 [root@localhost ~]# vim /etc/squid/squid.conf
@@ -204,7 +204,7 @@ It is equivalent to configuring the X-Forwarded-For header for client IP identif
 In a Forward Proxy, you have the ability to modify the X-Forwarded-For header to include arbitrary changes before forwarding it. <br>
 Since the proxy connection request IP may differ from the actual client IP, it's recommended not to use this feature.<br>
 
-[ Check Item ]
+**Audit:**
 - Check if the "follow_x_forwarded_for" feature is restricted. If it's not explicitly specified in the configuration, it is in its default state (not restricted).
 ```bash
 [root@localhost ~]# vim /etc/squid/squid.conf
@@ -214,7 +214,7 @@ follow_x_forwarded_for ...
 follow_x_forwarded_for ...
 ```
 
-[ Solution ]
+**Remediation:**
 - To restrict the "follow_x_forwarded_for" setting, limit it to the local host.
 ```bash
 [root@localhost ~]# vim /etc/squid/squid.conf
@@ -235,7 +235,7 @@ For example, when system A connects to www.google.com through a proxy, the proxy
 
 Since the internal system's IP is being sent to external hosts and can be identified, it's recommended not to use this feature.
 
-[ Check Item ]
+**Audit:**
 - Check if the forwarded_for feature is disabled. If it's not explicitly specified in the configuration, it is in its default state (enabled).
 ```bash
 [root@localhost ~]# vim /etc/squid/squid.conf
@@ -244,7 +244,7 @@ Since the internal system's IP is being sent to external hosts and can be identi
 forwarded_for delete  # <== It should be set to 'delete' or 'off'
 ```
 
-[ Solution ]
+**Remediation:**
 - Set the "forwarded_for" to "delete" to disable the feature.
 - To prevent clients from inserting IP addresses into the X-Forwarded-For header, block it using request_header_access.
 ```bash
@@ -262,7 +262,7 @@ Typically, only GET, POST, OPTIONS, and CONNECT should be allowed. <br>
 
 The CONNECT method is used to establish a tunnel through the proxy and is commonly used for HTTPS connections.
 
-[ Solution ]
+**Remediation:**
 - Set the allowed HTTP methods for proxy access. If not explicitly specified, all HTTP methods are allowed.
 - For a "Forward Proxy", restrict the allowed methods to GET, POST, OPTIONS, and CONNECT.
 ```bash
@@ -286,7 +286,7 @@ Alternatively, you can restrict access to specific external URLs only for truste
 
 Each policy can also be controlled by setting a time limit for operation
 
-[ Solution ]
+**Remediation:**
 - Package updates, library downloads, and other trusted targets (URLs) can be allowed for common usage.
 - For other cases, configure access control policies by specifying trusted (source) hosts, domains, or IP ranges and specifying the necessary (destination) external URLs to restrict access.
 - If proxy usage is required for a specific time period, set the operational hours using the time directive.
@@ -467,7 +467,7 @@ To improve log readability, you should convert the timestamp into a human-readab
 
 Additionally, access logs should include essential information for access log analysis, such as remote IP, requested URL, User-Agent, response status, data transfer size (bytes sent and received), and more.
 
-[ Check Item ]
+**Audit:**
 - Check if the proxy logs are currently stored in the default format.
 ```bash
 [root@localhost ~]# tail -f /var/log/squid/access.log
@@ -482,7 +482,7 @@ Additionally, access logs should include essential information for access log an
 1694992846.309      4 192.168.130.229 TCP_DENIED/403 3951 CONNECT rpm.dl.getenvoy.io:443 - HIER_NONE/- text/html
 ```
 
-[ Solution ]
+**Remediation:**
 - change the timestamps to human-readable format
 - set the timezone to the local system timezone
 - Set the remote IP, requested URL, User-Agent, transfer result, and sent/received data size in the log format
@@ -525,7 +525,7 @@ ID | Value  | File | Description
 1 | Access Logs | /var/log/squid/access.log | Records information about HTTP requests and responses processed by the proxy.
 2 | Cache Logs | /var/log/squid/cache.log | Contains information about the operation of the proxy server. It is used for Squid debugging, performance monitoring, and troubleshooting.
 
-[ Solution ]
+**Remediation:**
 - use logrotate to automatically manage and retain logs as specified. Below is an example logrotate configuration for Squid logs:
 ```bash
 [root@localhost ~]# vim /etc/logrotate.d/squid
@@ -656,7 +656,7 @@ However, you can take advantage of the User-Agent information provided by these 
 
 Here's how you can do it:
 
-[ Solution ]
+**Remediation:**
 - In your squid.conf configuration file, define an access control list (ACL) for dnf/yum Linux package update managers based on the User-Agent:
   
 < squid.conf >
@@ -835,3 +835,8 @@ checkappexec\.microsoft\.com
 
 # And...
 - If you find this helpful, please the **"star"**:star2: to support further improvements.
+
+---
+### Read Next
+- [Setup WordPress With Security Best Practice](https://github.com/password123456/setup-wordpress-with-security-best-practice)
+
