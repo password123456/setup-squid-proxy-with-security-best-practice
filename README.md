@@ -3,15 +3,13 @@
 
 - Security best practices when a squid proxy is being used as a "forward proxy"
 - If you are configuring as a reverse proxy, some topics in this guide may not be applicable. We recommend cross-referencing other security guides for appropriate security hardening criteria when using Reverse Proxy.
-- Last Modified: 2024.04.30
+- Last Modified: May 31, 2024
 ```
 # cat /etc/redhat-release
 Rocky Linux release 8.8 (Green Obsidian)
 
 # rpm -qa rpm -qa | grep squid
 squid-4.15-6.module+el8.8.0+1273+55f5b063.x86_64
-
-2023.11.04 Confirmed.
 ```
 ***
 ## Table of Contents
