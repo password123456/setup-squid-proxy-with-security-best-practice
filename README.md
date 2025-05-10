@@ -1,5 +1,5 @@
 # Setup Squid Proxy With Security Best Practice
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fpassword123456%2Fsetup-squid-proxy-with-security-best-practice&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
+[![Hits](https://hits.sh/github.com/password123456/setup-squid-proxy-with-security-best-practice.svg?view=today-total)](https://hits.sh/github.com/password123456/setup-squid-proxy-with-security-best-practice/)
 
 - Security best practices when a squid proxy is being used as a "forward proxy"
 - If you are configuring as a reverse proxy, some topics in this guide may not be applicable. We recommend cross-referencing other security guides for appropriate security hardening criteria when using Reverse Proxy.
